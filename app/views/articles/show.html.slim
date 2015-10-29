@@ -1,0 +1,22 @@
+.page-header
+  h1 Article
+
+dl
+  dt Url
+  dd= @article.url
+  dt Title
+  dd= @article.title
+  dt Author
+  dd= @article.author_id
+  dt Parent
+  dd= @article.parent_id
+
+/- if can?(:edit, @article)
+= link_to text_with_icon('Edit', 'edit'), edit_article_path(@article), class: 'btn btn-default'
+'
+= link_to text_with_icon('Back', 'chevron-left'), articles_path, class: 'btn btn-default'
+
+/- if can?(:destroy, @article)
+'
+= link_to text_with_icon('Destroy', 'remove'), article_path(@article), \
+          method: :delete, data: { confirm: "Are you sure?" }, class: 'btn btn-danger'

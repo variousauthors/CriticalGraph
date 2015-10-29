@@ -1,6 +1,7 @@
 Ooshew::Application.routes.draw do
 
-  root to: 'pages#root'
+  resources :articles
+  root to: 'articles#index'
 
   mount JasmineRails::Engine => '/specs' if defined?(JasmineRails)
 

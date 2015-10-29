@@ -11,9 +11,58 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20151029002028) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "hstore"
+
+  create_table "article_references", id: false, force: :cascade do |t|
+    t.integer "article_id"
+    t.integer "referenced_article_id"
+  end
+
+  create_table "articles", force: :cascade do |t|
+    t.string   "url"
+    t.string   "title"
+    t.integer  "author_id"
+    t.integer  "parent_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "authors", force: :cascade do |t|
+    t.string   "name"
+    t.string   "handle"
+    t.string   "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "basecamp_calendar_events", force: :cascade do |t|
+    t.integer  "training_event_id"
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
+    t.string   "summary"
+    t.text     "description"
+    t.string   "basecamp_id"
+    t.boolean  "public"
+    t.boolean  "all_day"
+    t.boolean  "trashed"
+    t.string   "url"
+    t.boolean  "published",         default: false
+  end
+
+  create_table "training_events", force: :cascade do |t|
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.text     "check_in_instructions"
+    t.text     "parking_details"
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+    t.hstore   "details"
+    t.string   "students",              default: [],              array: true
+    t.string   "equipment",             default: [],              array: true
+  end
 
 end

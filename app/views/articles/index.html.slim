@@ -1,0 +1,32 @@
+div.page-header
+  h1 Listing articles
+
+table.table.table-striped
+  thead
+    tr
+      th ID
+      th Url
+      th Title
+      th Author
+      th Parent
+      th Actions
+
+  tbody
+    - @articles.each do |article|
+      tr
+        /td= link_to_if can?(:show, article), article.id, article_path(article)
+        td= link_to article.id, article_path(article)
+        td= article.url
+        td= article.title
+        td= article.author_id
+        td= article.parent_id
+          td
+          /- if can? :edit, article
+          = link_to text_with_icon('Edit', 'edit'), edit_article_path(article), class: 'btn btn-default btn-xs'
+          '
+          /- if can? :destroy, article
+          = link_to text_with_icon('Destroy', 'remove'), article_path(article), \
+                    method: :delete, data: { confirm: "Are you sure?" }, class: 'btn btn-default btn-xs btn-danger'
+
+/- if can? :create, Article
+= link_to text_with_icon('New Article', 'plus'), new_article_path, class: 'btn btn-primary'

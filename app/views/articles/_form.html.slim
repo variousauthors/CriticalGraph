@@ -1,0 +1,15 @@
+= simple_form_for(@article) do |f|
+  = f.error_notification
+
+  .form-inputs
+    = f.input :url, autofocus: true
+    = f.input :title
+    = f.input :author_id
+    = f.input :parent_id
+
+  .form-actions
+    = button_tag(type: 'submit', class: 'btn btn-primary') do
+      = text_with_icon("#{btn_action_prefix} Article", action_icon_name)
+    '
+    = link_to text_with_icon('Back', 'chevron-left'), articles_path, class: 'btn btn-default'
+
