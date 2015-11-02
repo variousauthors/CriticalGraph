@@ -1,10 +1,13 @@
 = simple_form_for(@article) do |f|
   = f.error_notification
+  - author = @article.author.handle if @article.author.present?
+  - references = @article.references_csv if @article.author.present?
 
   .form-inputs
-    = f.input :url, autofocus: true
     = f.input :title
-    = f.association :author
+    = f.input :url, autofocus: true
+    = f.input :author, as: :string, label: "Author (twitter handle)", input_html: { value: author || "" }
+    = f.input :references, as: :text, label: "References (author, url)", input_html: { value: references || "" }
 
   .form-actions
     = button_tag(type: 'submit', class: 'btn btn-primary') do

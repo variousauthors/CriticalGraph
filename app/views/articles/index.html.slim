@@ -18,7 +18,7 @@ table.table.table-striped
         td= link_to article.id, article_path(article)
         td= article.url
         td= article.title
-        td= article.author.name
+        td= article.author.identity
         td= article.references.count
         td
           = link_to text_with_icon('Edit', 'edit'), edit_article_path(article), class: 'btn btn-default btn-xs'

@@ -1,4 +1,5 @@
 class ArticlesController < ApplicationController
+  require 'csv'
   before_action :set_article, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -17,6 +18,18 @@ class ArticlesController < ApplicationController
 
   def create
     @article = Article.new(article_params)
+
+    author = Author.find_or_create_by!({ handle: params[:article][:author] })
+    author.articles << @article
+
+    CSV.parse(params[:article][:references]).each do |reference|
+      author = Author.find_or_create_by(handle: reference.first)
+      url = reference.last
+
+      reference = Article.find_or_create_by!({ url: url, author: author })
+
+      @article.references << reference
+    end
 
     if @article.save
       redirect_to @article, notice: 'Article was successfully created.'
