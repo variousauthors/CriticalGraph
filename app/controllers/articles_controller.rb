@@ -24,7 +24,9 @@ class ArticlesController < ApplicationController
     author.articles << @article
 
     CSV.parse(params[:article][:references]).each do |reference|
-      author = Author.find_or_create_by(handle: reference.first)
+      reference.map!(&:strip)
+
+      author = Author.find_or_create_by!(handle: reference.first.downcase)
       url = reference.last
 
       reference = Article.find_or_create_by!({ url: url, author: author })
@@ -40,6 +42,21 @@ class ArticlesController < ApplicationController
   end
 
   def update
+    if params[:article][:references].present?
+      @article.references = []
+
+      CSV.parse(params[:article][:references]).each do |reference|
+        reference.map!(&:strip)
+
+        author = Author.find_or_create_by!(handle: reference.first.downcase)
+        url = reference.last
+
+        reference = Article.find_or_create_by!({ url: url, author: author })
+
+        @article.references << reference
+      end
+    end
+
     if @article.update(article_params)
       redirect_to @article, notice: 'Article was successfully updated.'
     else

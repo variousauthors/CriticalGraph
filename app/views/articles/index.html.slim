@@ -16,7 +16,7 @@ table.table.table-striped
       tr
         /td= link_to_if can?(:show, article), article.id, article_path(article)
         td= link_to article.id, article_path(article)
-        td= article.url
+        td= link_to article.url, article.url
         td= article.title
         td= article.author.identity
         td= article.references.count
