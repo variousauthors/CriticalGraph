@@ -3,7 +3,8 @@ div.page-header
 
   /- if can? :create, Article
   = link_to text_with_icon('New Article', 'plus'), new_article_path, class: 'btn btn-primary'
-  = link_to text_with_icon('Export Graph', 'file'), graph_gephi_csv_create_path(format: :csv), class: 'btn btn-primary'
+  = link_to text_with_icon('Export Graph', 'file'), graph_gephi_csv_create_path(format: :csv), class: 'btn btn-primary push-left'
+  = link_to text_with_icon('Export Graph', 'file'), graph_gephi_csv_create_path(format: :csv), class: 'btn btn-primary push-left'
 
 table.table.table-striped
   thead
