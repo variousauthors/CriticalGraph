@@ -12,7 +12,7 @@ class Graph::GephiCsvController < ApplicationController
     # build a matrix in memory!
 
     respond_to do |format|
-      format.csv { send_data(article_graph) }
+      format.csv { send_data(full_graph) }
     end
   end
 
@@ -63,14 +63,106 @@ class Graph::GephiCsvController < ApplicationController
     gephi_csv
   end
 
-  def article_graph
+  def full_graph
     # the adj matrix will have 4 quandrants:
     # authors to articles | articles to authors is symmetrical
     # articles to articles is DAG
     #
+    # AUTH is N
+    # ARTI is M
+    #
+    # structure
     #      AUTH ARTI
     # AUTH 0000 A--R
     # ARTI R--A R->R <-- this is DAG
+    #
+    # dimensions
+    #      AUTH ARTI
+    # AUTH  NxN  NxM
+    # ARTI  MxN  MxM
+
+    # TODO: so should we construct the parts and the put them together?
+    # TODO replace the GSUBs with a way of quoting strings that GePHI can handle...
+    authors = Author.alphabetically
+    handles = authors.map(&:handle) # N
+    article_ids = Article.all.map(&:id) # M
+
+    # size: M x M
+    article_to_article = Article.all.map do |article|
+
+      references = article.references.reduce(Hash.new(0)) do |memo, ref|
+        # edges from an article to other articles
+        memo[ref.id] += 1
+
+        memo
+      end
+
+      # turns the hash of {id: count} pairs into an array indexed
+      # by the article_ids
+      adjacencies = article_ids.reduce([]) do |memo, id|
+        memo << references[id]
+
+        memo
+      end
+
+      adjacencies
+    end
+
+    # size: N x M
+    author_to_article = authors.map do |author|
+      # count the number of outgoing edges to each article
+      references = author.articles.reduce(Hash.new(0)) do |memo, article|
+        # edges from an author to her articles
+        memo[article.id] += 1
+
+        memo
+      end
+
+      # turns the hash of {id: count} pairs into an array indexed
+      # by the article_ids
+      adjacencies = article_ids.reduce([]) do |memo, id|
+        memo << references[id]
+
+        memo
+      end
+
+      adjacencies
+    end
+
+    # size: M x N
+    article_to_author = author_to_article.transpose
+
+    # size: N x N
+    zeroes = zeroes(handles.length)
+
+    handles = handles.map { |handle| handle.gsub(" ", "_") }
+
+    # we want to augment these matrices all together,
+    # but they are not matrices, they are arrays so...
+    adjacency_matrix = (zeroes(handles.length).zip author_to_article).map(&:flatten) + (article_to_author.zip article_to_article).map(&:flatten)
+
+    gephi_csv = CSV.generate(col_sep: ";") do |csv|
+      # the first row is like [_, name, name, ...]
+      # to mark the columns
+      labels = handles + article_ids
+      csv << [nil] + labels
+
+      adjacency_matrix.each_with_index do |row, index|
+        csv << row.prepend(labels[index])
+      end
+    end
+
+    gephi_csv
+  end
+
+  def authorship_graph
+    # the adj matrix will have 4 quandrants:
+    # authors to articles | articles to authors is symmetrical
+    # the rest is zeroes
+    #
+    #      AUTH ARTI
+    # AUTH 0000 A--R
+    # ARTI R--A 0000
 
     # TODO: so should we construct the parts and the put them together?
     # TODO replace the GSUBs with a way of quoting strings that GePHI can handle...
