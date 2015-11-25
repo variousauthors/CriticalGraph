@@ -103,20 +103,18 @@ class Graph::GephiCsvController < ApplicationController
     end
 
     article_to_author = author_to_article.transpose
-    zeroes = [[0] * handles.length] * handles.length
 
     handles = handles.map { |handle| handle.gsub(" ", "_") }
 
     # we want to augment these matrices all together,
     # but they are not matrices, they are arrays so...
-
-    adjacency_matrix = (zeroes.zip author_to_article).map(&:flatten) + (article_to_author.zip zeroes).map(&:flatten)
+    adjacency_matrix = (zeroes(handles.length).zip author_to_article).map(&:flatten) + (article_to_author.zip zeroes(article_ids.length)).map(&:flatten)
 
     gephi_csv = CSV.generate(col_sep: ";") do |csv|
       # the first row is like [_, name, name, ...]
       # to mark the columns
       labels = handles + article_ids
-      csv << labels.prepend(nil)
+      csv << [nil] + labels
 
       adjacency_matrix.each_with_index do |row, index|
         csv << row.prepend(labels[index])
@@ -125,4 +123,9 @@ class Graph::GephiCsvController < ApplicationController
 
     gephi_csv
   end
+
+  def zeroes(n, m = n)
+    [[0] * m] * n
+  end
+
 end
